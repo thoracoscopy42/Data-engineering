@@ -5,7 +5,7 @@ import requests
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 
-from .data_sources.npb import fetch_gold
+from .data_sources.npb import fetch_gold, fetch_currency
 
 @require_http_methods(["GET", "POST"])
 def index(request):
@@ -13,26 +13,42 @@ def index(request):
     context = {}
 
     if request.method == "POST":
-        action = request.POST.get("action")
+        if request.POST.get("action") == "fetch_all":
 
-        if action == "fetch_gold":
             try:
-                data = fetch_gold()
+                data = fetch_all()
 
-                print("Dane zlota: ", flush=True)
-                print(
-                    json.dumps(data, ensure_ascii=False, indent=2)
+                counts = {
+                    name: len(records)
+                    for name, records in data.items()
+                }
+
+                print("Liczba pobranych rekordów:", counts, flush=True)
+
+                context["message"] = (
+                    f"Pobrano: "
+                    f"złoto - {counts['gold']},"
+                    f"USD   - {counts['usd']}, "
+                    f"EUR   - {counts['eur']}, "
+                    f"CHF   - {counts['chf']}."
                 )
 
-                context["gold_data"] = data
-                context["message"]   = (
-                    f"pobrano {len(data)} notowań"
-                )
             except (requests.exceptions.RequestException, ValueError) as exc:
-                print(f"Błąd: {exc}", flush=True)
+                print(f"Błąd pobierania: {exc}", flush=True)
 
-                context["error"] = ("dupa 1")
+                context["error"] = (
+                    "Nie udało się pobrać wszystkich danych. "
+                    "Sprawdź szczegóły w terminalu."
+                )
         else:
-            context["error"] = "dupa 2"
+            context["error"] = "Nieznana akcja."
 
-    return render(request, "M:/repos_new/Data-engineering/django/dashboard/templates/index.html", context)
+    return render(request, "index.html", context)
+
+def fetch_all():
+    return {
+        "gold": fetch_gold(),
+        "usd":  fetch_currency("usd"),
+        "eur":  fetch_currency("eur"),
+        "chf":  fetch_currency("chf"),
+    }
