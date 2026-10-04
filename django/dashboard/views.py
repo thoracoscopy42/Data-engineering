@@ -5,7 +5,7 @@ import requests
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 
-from .data_sources.npb import fetch_gold, fetch_currency
+from .data_sources.nbp import fetch_gold, fetch_currency
 
 @require_http_methods(["GET", "POST"])
 def index(request):
