@@ -117,28 +117,16 @@
 
     <div class="cards">
         <section class="card">
-            <h2>Złoto</h2>
-            <p>Notowania NBP - styczeń 2025.</p>
+            <h2>Pobieranie Danych</h2>
 
             <form method="post" action="{% url 'dashboard:index' %}">
                 {% csrf_token %}
-                <button type="submit" name="action" value="fetch_gold">
-                    Pobierz dane złota
+                <button type="submit" name="action" value="fetch_all">
+                    Pobierz złoto i waluty
                 </button>
             </form>
         </section>
 
-        <section class="card">
-            <h2>Waluty</h2>
-            <p>USD/PLN, EUR/PLN i CHF/PLN.</p>
-            <p>Do podłączenia.</p>
-        </section>
-
-        <section class="card">
-            <h2>Prognozy</h2>
-            <p>Porównanie modeli i prognoza ceny złota.</p>
-            <p>Do przygotowania.</p>
-        </section>
     </div>
 
     {% if message %}
