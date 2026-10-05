@@ -72,3 +72,36 @@ złota i walut. Podłączyliśmy ją do przycisku w dashboardzie.
 Przenieśliśmy klucz Django i klucz API FRED do lokalnego
 pliku `.env`. W ustawieniach aplikacji dodaliśmy ich odczyt
 przy użyciu biblioteki `python-dotenv`.
+
+## Day 3 - 5.10.2026
+
+## Integracja danych z FRED
+
+Podłączyliśmy do wspólnego pobierania wszystkie wybrane serie FRED.
+Rozszerzyliśmy zakres pobierania danych do ostatnich 13 lat.
+
+## Przechowywanie danych
+
+Dodaliśmy zapis rekordów do pliku JSON, w katalogu `data/raw`.
+Każde pobranie jest parą `value-date`.
+
+Rozdzieliliśmy przechowywanie na warstwy `raw`, `clean`, `serving` w katalogu `django/data`.
+
+## Czyszczenie danych
+
+Przygotowaliśmy funkcje: `clean_series()` oraz `clean_all()`, wykorzystując pandas i numpy.
+Ujednoliciliśmy nazwy kolumn, przekonwertowaliśmy daty i wartości liczbowe
+oraz uporządkowaliśmy rekordy wg. daty(wraz z indeksami).
+
+Dodaliśmy kontrole wymaganych pól, brakujących i powtarzających
+się dat, wartości nieskończonych oraz dodatnich cen złota
+i kursów walut. Liczba rekordów i braków jest wypisywana
+w terminalu.
+
+Oczyszczone serie zapisujemy jako csv w `clean`.
+
+## Łączenie danych
+
+Dodaliśmy funkcje `merge_series()`, która łączy oczyszczone serie po dacie.
+Sprawdzana jest unikalność dat podczas łaćzenia oraz zachowanie liczby notowań złota.
+Wynik tego działania zapisujemy jako wspólny plik CSV w warstwie `serving`.
