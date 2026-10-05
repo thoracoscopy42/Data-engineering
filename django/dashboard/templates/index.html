@@ -127,6 +127,45 @@
             </form>
         </section>
 
+        <section class="card">
+            <h2>Oczyść dane</h2>
+
+            <form method="post" action="{% url 'dashboard:index' %}">
+                {% csrf_token %}
+                <button type="submit" name="action" value="fetch_all">
+                    Oczyść dane
+                </button>
+        </section>
+
+                <section class="card">
+            <h2>Przygotuj dane analityczne</h2>
+
+            <form method="post" action="{% url 'dashboard:index' %}">
+                {% csrf_token %}
+                <button type="submit" name="action" value="fetch_all">
+                    Przygotuj dane analityczne
+                </button>
+        </section>
+
+                <section class="card">
+            <h2>Wytrenuj model</h2>
+
+            <form method="post" action="{% url 'dashboard:index' %}">
+                {% csrf_token %}
+                <button type="submit" name="action" value="fetch_all">
+                    Wytrenuj model
+                </button>
+        </section>
+
+        <section class="card">
+            <h2>Dashboard inwestora</h2>
+
+            <form method="post" action="{% url 'dashboard:index' %}">
+                {% csrf_token %}
+                <button type="submit" name="action" value="fetch_all">
+                    Dashboard inwestora
+                </button>
+        </section>
     </div>
 
     {% if message %}
