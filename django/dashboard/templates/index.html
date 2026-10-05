@@ -132,9 +132,11 @@
 
             <form method="post" action="{% url 'dashboard:index' %}">
                 {% csrf_token %}
-                <button type="submit" name="action" value="fetch_all">
+
+                <button type="submit" name="action" value="clean_all">
                     Oczyść dane
                 </button>
+            </form>
         </section>
 
                 <section class="card">
@@ -142,9 +144,11 @@
 
             <form method="post" action="{% url 'dashboard:index' %}">
                 {% csrf_token %}
-                <button type="submit" name="action" value="fetch_all">
+
+                <button type="submit" name="action" value="prepare_serving">
                     Przygotuj dane analityczne
                 </button>
+            </form>
         </section>
 
                 <section class="card">
