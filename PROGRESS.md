@@ -1,4 +1,6 @@
-# Day 1
+# Progress
+
+## Day 1 - 03.10.2026
 
 ## Problem Odbiorcy
 
@@ -42,3 +44,31 @@ Lista powyższych zmiennych jest jedynie początkowym zestawem kandydatów. Przy
 Źródła danych:
 -NBP: <https://api.nbp.pl/>
 -FRED: <https://fred.stlouisfed.org/>
+
+## Day 2 - 04.10.2026
+
+## Dokumentacja projektu
+
+Rozbudowaliśmy README o cel projektu, potrzeby odbiorców,
+pytania analityczne oraz planowany sposób pozyskiwania
+i przetwarzania danych. Określiliśmy również sposób oceny
+przyszłych modeli prognostycznych.
+
+## Pobieranie danych z NBP
+
+Rozszerzyliśmy zakres pobierania cen złota do ostatnich 10 lat.
+Ze względu na limit API podzieliliśmy ten okres na przedziały
+obejmujące maksymalnie 93 dni. Wyniki kolejnych zapytań
+łączymy w jedną listę uporządkowaną według daty.
+
+Dodaliśmy pobieranie kursów średnich USD/PLN, EUR/PLN
+i CHF/PLN z tabeli A NBP dla tego samego okresu.
+
+Przygotowaliśmy funkcję `fetch_all()`, która wywołuje pobieranie
+złota i walut. Podłączyliśmy ją do przycisku w dashboardzie.
+
+## Konfiguracja aplikacji
+
+Przenieśliśmy klucz Django i klucz API FRED do lokalnego
+pliku `.env`. W ustawieniach aplikacji dodaliśmy ich odczyt
+przy użyciu biblioteki `python-dotenv`.
