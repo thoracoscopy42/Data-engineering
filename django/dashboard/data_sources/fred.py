@@ -13,9 +13,9 @@ def fetch_series(series_id):
     end = date.today()
 
     try:
-        start = end.replace(year=end.year - 10)
+        start = end.replace(year=end.year - 13)
     except ValueError:
-        start = end.replace(year=end.year - 10, day=28)
+        start = end.replace(year=end.year - 13, day=28)
 
     response = requests.get(
         "https://api.stlouisfed.org/fred/series/observations",

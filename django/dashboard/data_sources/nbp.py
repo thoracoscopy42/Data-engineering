@@ -9,9 +9,9 @@ def fetch_gold():
     # Ta sama data 10 lat wcześniej.
     # Dla 29 lutego przyjmujemy 28 lutego.
     try:
-        start = end.replace(year=end.year - 10)
+        start = end.replace(year=end.year - 13)
     except ValueError:
-        start = end.replace(year=end.year - 10, day=28)
+        start = end.replace(year=end.year - 13, day=28)
 
     records = []
 
@@ -52,9 +52,9 @@ def fetch_currency(code):
     end = date.today()
 
     try:
-        start = end.replace(year=end.year - 10)
+        start = end.replace(year=end.year - 13)
     except ValueError:
-        start = end.replace(year=end.year - 10, day=28)
+        start = end.replace(year=end.year - 13, day=28)
 
     records = []
 
