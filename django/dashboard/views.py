@@ -5,8 +5,37 @@ import requests
 from django.shortcuts import render
 from django.views.decorators.http import require_http_methods
 
+# sources
 from .data_sources.nbp import fetch_gold, fetch_currency
 from .data_sources.fred import fetch_series
+
+# data processing
+from .data_processing.data_storage import DATA_DIR, save_raw
+
+
+
+def fetch_all():
+    return {
+        "gold": fetch_gold(),
+        "usd":  fetch_currency("usd"),
+        "eur":  fetch_currency("eur"),
+        "chf":  fetch_currency("chf"),
+        "DFII10": fetch_series("DFII10"),
+        "DGS10": fetch_series("DGS10"),
+        "DGS2": fetch_series("DGS2"),
+        "DFF": fetch_series("DFF"),
+        "T10YIE": fetch_series("T10YIE"),
+        "VIXCLS": fetch_series("VIXCLS"),
+        "DCOILWTICO": fetch_series("DCOILWTICO"),
+        "NASDAQCOM": fetch_series("NASDAQCOM"),
+        "CPIAUCSL": fetch_series("CPIAUCSL"),
+        "UNRATE": fetch_series("UNRATE"),
+    }
+
+def process_all():
+    return {
+        
+    }
 
 @require_http_methods(["GET", "POST"])
 def index(request):
@@ -18,6 +47,8 @@ def index(request):
 
             try:
                 data = fetch_all()
+
+                run_id = save_raw(data)
 
                 counts = {
                     name: len(records)
@@ -56,20 +87,3 @@ def index(request):
 
     return render(request, "index.html", context)
 
-def fetch_all():
-    return {
-        "gold": fetch_gold(),
-        "usd":  fetch_currency("usd"),
-        "eur":  fetch_currency("eur"),
-        "chf":  fetch_currency("chf"),
-        "DFII10": fetch_series("DFII10"),
-        "DGS10": fetch_series("DGS10"),
-        "DGS2": fetch_series("DGS2"),
-        "DFF": fetch_series("DFF"),
-        "T10YIE": fetch_series("T10YIE"),
-        "VIXCLS": fetch_series("VIXCLS"),
-        "DCOILWTICO": fetch_series("DCOILWTICO"),
-        "NASDAQCOM": fetch_series("NASDAQCOM"),
-        "CPIAUCSL": fetch_series("CPIAUCSL"),
-        "UNRATE": fetch_series("UNRATE"),
-    }
