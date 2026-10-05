@@ -91,7 +91,7 @@ Rozdzieliliśmy przechowywanie na warstwy `raw`, `clean`, `serving` w katalogu `
 
 Przygotowaliśmy funkcje: `clean_series()` oraz `clean_all()`, wykorzystując pandas i numpy.
 Ujednoliciliśmy nazwy kolumn, przekonwertowaliśmy daty i wartości liczbowe
-oraz uporządkowaliśmy rekordy wg. daty(wraz z indeksami).
+oraz uporządkowaliśmy rekordy wg. daty (wraz z indeksami).
 
 Dodaliśmy kontrole wymaganych pól, brakujących i powtarzających
 się dat, wartości nieskończonych oraz dodatnich cen złota
