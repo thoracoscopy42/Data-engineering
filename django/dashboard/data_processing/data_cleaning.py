@@ -124,6 +124,34 @@ def merge_series(tables):
 
     return merged
 
-def prepare_data():
+
+def prepare_serving_data(merged, tables):
+
+    df = merged.copy()
     
-    return {}
+    required_columns = []
+
+    for column in df.columns:
+            required_columns.append(column)
+
+    rows_before = len(df)
+
+    print(required_columns)
+    
+    df = df.dropna(
+        subset=required_columns,
+    ).reset_index(drop=True)
+
+    if df.empty:
+        raise ValueError("Dataset jest pusty")
+
+    print(
+        f"Usunięto {rows_before - len(df)} wierszy. "
+        f"Pozostało: {len(df)}.",
+        flush=True,
+    )
+
+    print("Pozostałe braki:", flush=True)
+    print(df.isna().sum(), flush=True)
+
+    return df

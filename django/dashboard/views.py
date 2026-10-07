@@ -13,7 +13,7 @@ from .data_sources.fred import fetch_series
 # data processing
 from .data_processing.data_storage import DATA_DIR, save_raw, save_clean, save_serving
 
-from .data_processing.data_cleaning import clean_series, clean_all, merge_series
+from .data_processing.data_cleaning import clean_series, clean_all, merge_series, prepare_serving_data
 
 
 
@@ -33,8 +33,8 @@ def fetch_all():
         "VIXCLS": fetch_series("VIXCLS"),
         "DCOILWTICO": fetch_series("DCOILWTICO"),
         "NASDAQCOM": fetch_series("NASDAQCOM"),
-        "CPIAUCSL": fetch_series("CPIAUCSL"),
-        "UNRATE": fetch_series("UNRATE"),
+        # "CPIAUCSL": fetch_series("CPIAUCSL"),
+        # "UNRATE": fetch_series("UNRATE"),
     }
 
 
@@ -72,8 +72,8 @@ def index(request):
                     f"VIXCLS - {counts['VIXCLS']}, "
                     f"DCOILWTICO - {counts['DCOILWTICO']}, "
                     f"NASDAQCOM - {counts['NASDAQCOM']}, "
-                    f"CPIAUCSL - {counts['CPIAUCSL']}, "
-                    f"UNRATE - {counts['UNRATE']}."
+                    # f"CPIAUCSL - {counts['CPIAUCSL']}, "
+                    # f"UNRATE - {counts['UNRATE']}."
                 )
 
             except (requests.exceptions.RequestException, ValueError) as exc:
@@ -137,7 +137,7 @@ def index(request):
                     "gold", "usd", "eur", "chf",
                     "DFII10", "DGS10", "DGS2", "DFF", "T10YIE",
                     "VIXCLS", "DCOILWTICO", "NASDAQCOM",
-                    "CPIAUCSL", "UNRATE",
+                    # "CPIAUCSL", "UNRATE",
                     }
 
                 available = {path.stem for path in csv_files}
@@ -158,13 +158,9 @@ def index(request):
                         )
 
                 merged = merge_series(tables)
-                path = save_serving(merged, clean_dir.name)
+                prepared = prepare_serving_data(merged, tables)
+                path = save_serving(prepared, clean_dir.name)
 
-                context["message"] = (
-                    f"Zapisano {path.name}. "
-                    f"Wiersze: {len(merged)}, "
-                    f"kolumny: {len(merged.columns)}."
-                )
 
             except (ValueError, KeyError, OSError) as exc:
                 print(f"Błąd przygotowania serving: {exc}", flush=True)

@@ -105,3 +105,8 @@ Oczyszczone serie zapisujemy jako csv w `clean`.
 Dodaliśmy funkcje `merge_series()`, która łączy oczyszczone serie po dacie.
 Sprawdzana jest unikalność dat podczas łaćzenia oraz zachowanie liczby notowań złota.
 Wynik tego działania zapisujemy jako wspólny plik CSV w warstwie `serving`.
+
+## Day 4 - 7.10.2026
+
+Dodaliśmy funkcję, która usuwa wiersze w których występują NaN bądź puste wartości.
+Przez problemy z integracją z całością zbioru danych zdecydowaliśmy się na usunięcie dwóch zmiennych: "CPIAUCSL", "UNRATE".
