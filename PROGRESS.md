@@ -110,3 +110,68 @@ Wynik tego działania zapisujemy jako wspólny plik CSV w warstwie `serving`.
 
 Dodaliśmy funkcję, która usuwa wiersze w których występują NaN bądź puste wartości.
 Przez problemy z integracją z całością zbioru danych zdecydowaliśmy się na usunięcie dwóch zmiennych: "CPIAUCSL", "UNRATE".
+
+## Day 5 - 13.10.2026
+
+### Cechy czasowe
+
+Dodaliśmy funkcję `add_time_features()` w data_processing/time_features.py.
+Wyznaczamy opóźnione ceny złota `gold_lag_1`, `gold_lag_7`
+i `gold_lag_14` oraz procentową zmianę ceny `gold_change_pct`.
+Opóźnienia dotyczą kolejnych notowań, a nie dni kalendarzowych.
+Cechy powstają po połączeniu serii, przed usunięciem wierszy
+z brakującymi wartościami i zapisaniem danych do serving.
+
+### Przygotowanie danych do modelowania
+
+Utworzyliśmy moduł `model_processing/create_model.py`, który zawiera
+funkcje przygotowania danych, uczenia modelu i oceny prognoz.
+
+Funkcja `prepare_model_data()` porządkuje dane chronologicznie,
+sprawdza wymagane kolumny, brakujące daty, typy liczbowe
+oraz brak wartości NaN i nieskończonych.
+Powtarzające się daty są obecnie wypisywane w terminalu,
+ale nie przerywają przygotowania danych.
+
+Tworzymy pary: cechy bieżącego notowania jako *`X`* oraz cena złota
+z następnego zachowanego wiersza jako *`y`*. Aktualna cena złota
+pozostaje również cechą wejściową.
+
+Dane dzielimy chronologicznie na trening, walidację i test
+w proporcjach 70/20/10. `StandardScaler` dopasowujemy wyłącznie
+do treningu, a walidację i test przekształcamy tymi samymi
+parametrami, obliczonymi osobno dla każdej kolumny.
+
+### Model i przeszukiwanie hiperparametrów
+
+Dodaliśmy uczenie sieci MLPRegressor z aktywacją ReLU,
+optymalizatorem Adam i ustalonym random_state=42.
+
+Przy użyciu ParameterGrid przygotowaliśmy przeszukiwanie
+48 konfiguracji obejmujących:
+
+- architektury: (32, 16), (64, 32), (128, 64) i (8, 4, 2);
+- regularyzację alpha: 0.001 i 0.01;
+- początkowe tempo uczenia: 0.0005 i 0.001;
+- rozmiar partii: auto, 18 i 32.
+
+Każda konfiguracja uczy się wyłącznie na treningu. Wybieramy
+model z najniższym `MAE` na naszym chronologicznym zbiorze walidacyjnym.
+Ranking konfiguracji, błędy oraz liczby wykonanych epok
+są wypisywane w terminalu.
+
+Dodaliśmy opcjonalną standaryzację zmiennej objaśnianej przez
+`TransformedTargetRegressor`, z automatycznym odwracaniem transformacji
+prognoz. Obecne wywołanie w widoku pozostawia tę opcję wyłączoną.
+
+### Ocena i integracja z aplikacją
+
+Dodaliśmy obliczanie `MAE`, `RMSE` i `R²`.
+Podłączyliśmy akcję create_model do przycisku w aplikacji.
+Widok wczytuje najnowszy plik `*_merged.csv` z *`serving`*,
+uruchamia przygotowanie danych i uczenie, a następnie wypisuje
+miary modelu w terminalu.
+
+Aktualnie najlepsza konfiguracja to:
+{'alpha': 0.01, 'batch_size': 32, 'hidden_layer_sizes': (8, 4, 2), 'learning_rate_init': 0.001}
+Z miarami wynoszącymi: *`"MAE": 3.3452`*; *`"RMSE": 4.39`*; *`'R2': 0.991`*.
