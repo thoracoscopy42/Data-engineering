@@ -12,10 +12,12 @@ from .data_sources.fred import fetch_series
 
 # data processing
 from .data_processing.data_storage import DATA_DIR, save_raw, save_clean, save_serving
-
 from .data_processing.data_cleaning import clean_series, clean_all, merge_series, prepare_serving_data
+from .data_processing.time_features import add_time_features
 
+# model training
 
+from .model_processing.create_model import create_model
 
 
 
@@ -157,7 +159,9 @@ def index(request):
                             parse_dates=["date"],
                         )
 
+
                 merged = merge_series(tables)
+                merged = add_time_features(merged)
                 prepared = prepare_serving_data(merged, tables)
                 path = save_serving(prepared, clean_dir.name)
 
@@ -167,6 +171,39 @@ def index(request):
                 context["error"] = (
                     f"Nie udało się przygotować danych analitycznych: {exc}"
                 )
+
+        elif request.POST.get("action") == "create_model":
+            
+            try:
+                files = sorted(
+                    (DATA_DIR / "serving").glob("*_merged.csv")
+                )
+
+                if not files:
+                    raise ValueError("Nie ma danych w serving.")
+
+                serving_path = files[-1]
+
+                df = pd.read_csv(
+                    serving_path,
+                    parse_dates=["date"],
+                )
+
+                df = df.sort_values("date").reset_index(drop=True)
+
+                if df.empty:
+                    raise ValueError("Dataframe jest pusty.")
+
+                model, c_model, results = create_model(df)
+
+                print("MLP", results["model_metrics"], flush=True)
+                print("Baseline", results["baseline_metrics"], flush=True)
+                
+
+            except (ValueError, KeyError, OSError) as exc:
+                context["error"] = (
+                    f"Nie udało się przygotować danych modelu: {exc}"
+                )      
 
         else:
             context["error"] = "Nieznana akcja."
