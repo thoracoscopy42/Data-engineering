@@ -6,6 +6,7 @@ from django.conf import settings
 
 import numpy 
 import pandas
+import pickle
 
 DATA_DIR = settings.BASE_DIR / "data"
 
@@ -78,4 +79,30 @@ def save_serving(df, run_id):
         flush=True,
     )
     
+    return path
+
+def save_model(model, model_data):
+
+    run_id = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S_%f")
+
+    folder = DATA_DIR / "models" / run_id
+    folder.mkdir(parents=True, exist_ok=True)
+
+    path = folder / "model.pkl"
+
+    saved_data = {
+        "model": model,
+        "scaler": model_data["scaler"],
+        "feature_names": model_data["feature_names"],
+
+        # X_test jest już przeskalowane w prepare_model_data().
+        "X_test": model_data["X_test"],
+        "y_test": model_data["y_test"],
+        "dates_test": model_data["dates_test"],
+        "baseline_test": model_data["baseline_test"],
+    }
+
+    with path.open("wb") as file:
+        pickle.dump(saved_data, file)
+
     return path
