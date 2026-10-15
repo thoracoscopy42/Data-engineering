@@ -11,13 +11,14 @@ from .data_sources.nbp import fetch_gold, fetch_currency
 from .data_sources.fred import fetch_series
 
 # data processing
-from .data_processing.data_storage import DATA_DIR, save_raw, save_clean, save_serving
+from .data_processing.data_storage import DATA_DIR, save_raw, save_clean, save_serving, save_model
 from .data_processing.data_cleaning import clean_series, clean_all, merge_series, prepare_serving_data
 from .data_processing.time_features import add_time_features
 
 # model training
 
 from .model_processing.create_model import create_model
+from .model_processing.dashboard_data import prepare_dashboard
 
 
 
@@ -196,6 +197,7 @@ def index(request):
 
                 model, c_model, results = create_model(df)
 
+                model_path = save_model(model, c_model)
                 print("MLP", results["model_metrics"], flush=True)
                 print("Baseline", results["baseline_metrics"], flush=True)
                 
@@ -210,3 +212,17 @@ def index(request):
 
     return render(request, "index.html", context)
 
+def investor_dashboard(request):
+
+    context = {}
+
+    try:
+        context = prepare_dashboard(
+            DATA_DIR / "models",
+            period=request.GET.get("period", "1"),
+        )
+
+    except (ValueError, KeyError, OSError) as exc:
+        context["error"] = str(exc)
+
+    return render(request, "dashboard.html", context)

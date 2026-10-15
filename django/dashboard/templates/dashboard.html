@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Dashboard inwestora</title>
+
+    <style>
+        :root {
+            color-scheme: dark;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #0f172a;
+            color: #e2e8f0;
+            font-family: Arial, sans-serif;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+
+        a {
+            color: #93c5fd;
+        }
+
+        p {
+            color: #94a3b8;
+            line-height: 1.6;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .card, .panel {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .panel {
+            margin-top: 20px;
+        }
+
+        .value {
+            font-size: 28px;
+            font-weight: bold;
+            margin: 12px 0;
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .filters a {
+            padding: 6px 10px;
+            font-size: 12px;
+            background: #334155;
+            border-radius: 6px;
+            text-decoration: none;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            white-space: nowrap;
+        }
+
+        th, td {
+            padding: 14px;
+            text-align: right;
+            border-bottom: 1px solid #334155;
+        }
+
+        th:first-child, td:first-child {
+            text-align: left;
+        }
+
+        .good {
+            color: #86efac;
+        }
+
+        .bad {
+            color: #fca5a5;
+        }
+
+        .note {
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+<main>
+
+    <a href="{% url 'dashboard:index' %}">
+        ← Panel danych i treningu
+    </a>
+
+    <h1>Dashboard inwestora</h1>
+
+    {% if error %}
+
+        <section class="panel">
+            <p>{{ error }}</p>
+        </section>
+
+    {% else %}
+
+        <p>
+            Test: {{ start_date|date:"d.m.Y" }}
+            – {{ end_date|date:"d.m.Y" }}.
+            Model: {{ model_name }}.
+        </p>
+
+        <div class="cards">
+
+            <section class="card">
+                <h3>MAE</h3>
+                <div class="value">
+                    {{ metrics.MAE|floatformat:2 }}
+                </div>
+                <p>PLN/g · średni błąd prognozy</p>
+            </section>
+
+            <section class="card">
+                <h3>RMSE</h3>
+                <div class="value">
+                    {{ metrics.RMSE|floatformat:2 }}
+                </div>
+                <p>PLN/g</p>
+            </section>
+
+            <section class="card">
+                <h3>R²</h3>
+                <div class="value">
+                    {{ metrics.R2|floatformat:3 }}
+                </div>
+                <p>Cały zbiór testowy</p>
+            </section>
+
+            <section class="card">
+                <h3>Trafność kierunku</h3>
+                <div class="value">
+                    {{ accuracy|floatformat:1 }}%
+                </div>
+                <p>Wzrost, spadek lub brak zmiany</p>
+            </section>
+
+        </div>
+
+        <p>
+            Baseline „kolejna cena = poprzednia”:
+            MAE {{ baseline_metrics.MAE|floatformat:2 }} PLN/g,
+            RMSE {{ baseline_metrics.RMSE|floatformat:2 }} PLN/g.
+        </p>
+
+        <nav class="filters">
+            <a href="?period=1">1 miesiąc</a>
+            <a href="?period=2">2 miesiące</a>
+            <a href="?period=3">3 miesiące</a>
+            <a href="?period=6">6 miesięcy</a>
+            <a href="?period=all">Cały test</a>
+        </nav>
+
+        <section class="panel">
+            <h2>Cena rzeczywista a prognoza</h2>
+
+            {{ price_chart|safe }}
+        </section>
+
+        <section class="panel">
+            <h2>Symulacja inwestycji 10 000 zł</h2>
+
+            <p>Wynik dla zakresu wybranego nad wykresami.</p>
+
+            {{ capital_chart|safe }}
+        </section>
+
+        <section class="panel">
+            <h2>Symulowane stopy zwrotu</h2>
+
+            <p>
+                Okresy liczone wstecz od końca testu:
+                {{ end_date|date:"d.m.Y" }}.
+            </p>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Okres</th>
+                            <th>Strategia modelu</th>
+                            <th>Kup i trzymaj</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for row in returns %}
+                            <tr>
+                                <td>{{ row.months }} mies.</td>
+
+                                {% if row.available %}
+                                    <td>
+                                        {{ row.model_return|floatformat:2 }}%
+                                    </td>
+                                    <td>
+                                        {{ row.hold_return|floatformat:2 }}%
+                                    </td>
+                                {% else %}
+                                    <td colspan="2">
+                                        Za krótki zbiór testowy
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="note">
+                Prognoza wzrostu → trzymamy złoto.
+                W pozostałych przypadkach → gotówkę.
+                Symulacja zakłada transakcje po cenach referencyjnych
+                NBP, bez kosztów, spreadu, podatku i odsetek.
+                Nie uwzględnia opóźnień publikacji danych wejściowych.
+            </p>
+        </section>
+
+        <section class="panel">
+            <h2>Ostatnie 10 notowań testowych</h2>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Cena PLN/g</th>
+                            <th>Prognoza PLN/g</th>
+                            <th>Błąd PLN/g</th>
+                            <th>Kierunek</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for row in recent %}
+                            <tr>
+                                <td>{{ row.date|date:"d.m.Y" }}</td>
+                                <td>{{ row.actual|floatformat:2 }}</td>
+                                <td>{{ row.predicted|floatformat:2 }}</td>
+                                <td>{{ row.error|floatformat:2 }}</td>
+
+                                <td>
+                                    {% if row.direction_ok %}
+                                        <span class="good">Trafiony</span>
+                                    {% else %}
+                                        <span class="bad">Nietrafiony</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    {% endif %}
+
+</main>
+</body>
+</html>

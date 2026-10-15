@@ -164,11 +164,11 @@
         <section class="card">
             <h2>Dashboard inwestora</h2>
 
-            <form method="post" action="{% url 'dashboard:index' %}">
-                {% csrf_token %}
-                <button type="submit" name="action" value="fetch_all">
-                    Dashboard inwestora
+            <a href="{% url 'dashboard:investor_dashboard' %}">
+                <button type="button">
+                    Otwórz dashboard
                 </button>
+            </a>
         </section>
     </div>
 
